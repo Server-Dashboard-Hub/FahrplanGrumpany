@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fahrplan Grumpany</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@600;700;800;900&family=Kulim+Park:ital,wght@0,400;0,600;0,700;1,400&family=Limelight&family=Neucha&family=Outfit:wght@500;700;800;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --bg-page: #07080b;
+            --panel-dark: #101218;
+            --panel-border: #232834;
+            
+            --pop-bg: #090a0f;
+            --pop-card: #121622;
+            --pop-line: #222838;
+            --pop-pink: #ff2d95;
+            --pop-gold: #ffd166;
+
+            --font-jost: 'Jost', sans-serif;
+            --font-limelight: 'Limelight', cursive;
+            --font-tabi: 'Neucha', cursive;
+            --font-poki: 'Kulim Park', sans-serif;
+            --font-display: 'Outfit', sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+
+            --c-mon: #7a2219;
+            --c-tue: #d8731a;
+            --c-wed: #d9a623;
+            --c-thu: #4d8b42;
+            --c-fri: #4a72b8;
+            --c-sat: #6b58a6;
+            --c-sun: #853e60;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: #f3f4f6;
+            font-family: var(--font-body);
+            min-height: 100vh;
+            width: 100%;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            position: relative;
+        }
+
+        .bg-day-0 { background-color: var(--c-mon); }
+        .bg-day-1 { background-color: var(--c-tue); }
+        .bg-day-2 { background-color: var(--c-wed); }
+        .bg-day-3 { background-color: var(--c-thu); }
+        .bg-day-4 { background-color: var(--c-fri); }
+        .bg-day-5 { background-color: var(--c-sat); }
+        .bg-day-6 { background-color: var(--c-sun); }
+
+        .font-jost-style { font-family: var(--font-jost) !important; }
+        .font-limelight-style { font-family: var(--font-limelight) !important; }
+        .font-tabi-style { font-family: var(--font-tabi) !important; }
+        .font-poki-style { font-family: var(--font-poki) !important; }
+        .font-outfit-style { font-family: var(--font-display) !important; }
+        .font-jakarta-style { font-family: var(--font-body) !important; }
+
+        .day-card-container {
+            width: 100%;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .day-block-top {
+            min-height: 135px;
+            box-sizing: border-box;
+            transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .day-block-bottom {
+            min-height: 100px;
+            box-sizing: border-box;
+            transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .custom-date-size { font-size: 28px !important; line-height: 1.05; }
+        .custom-city-size { font-size: 24px !important; line-height: 1.1; }
+
+        .day-card-container:hover .day-block-top, 
+        .day-card-container:hover .day-block-bottom {
+            filter: brightness(1.18);
+            box-shadow: 0 0 16px rgba(255, 45, 149, 0.35);
+        }
+
+        .side-bar-vertical {
+            background: linear-gradient(180deg, #161a22 0%, #0d0f14 100%);
+            border: 1px solid var(--panel-border);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+            width: 30px;
+            min-width: 30px;
+        }
+        .side-bar-vertical:hover {
+            border-color: var(--pop-pink);
+            box-shadow: 0 0 12px rgba(255, 45, 149, 0.4);
+            background: rgba(255, 45, 149, 0.15);
+        }
+
+        .banner-item {
+            height: 48px;
+            min-height: 48px;
+            transition: filter 0.15s ease, transform 0.15s ease;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-family: var(--font-display);
+            font-size: 16px !important;
+            font-weight: 900 !important;
+            letter-spacing: 1.5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+        }
+        .banner-item:hover {
+            filter: brightness(1.25);
+            transform: scale(1.005);
+        }
+
+        .banner-spacer {
+            height: 48px;
+            min-height: 48px;
+        }
+
+        /* Freie Deko / Sticker Elemente */
+        .free-sticker {
+            position: absolute;
+            cursor: grab;
+            user-select: none;
+            z-index: 40;
+            touch-action: none;
+        }
+        .free-sticker:active {
+            cursor: grabbing;
+        }
+        .free-sticker .sticker-controls {
+            display: none;
+            position: absolute;
+            top: -28px;
+            left: 0;
+            background: #121622;
+            border: 1px solid var(--pop-pink);
+            border-radius: 6px;
+            padding: 2px 6px;
+            gap: 6px;
+            font-size: 11px;
+            z-index: 50;
+            white-space: nowrap;
+        }
+        .deco-mode-active .free-sticker:hover .sticker-controls {
+            display: flex;
+        }
+        .deco-mode-active .free-sticker {
+            outline: 2px dashed rgba(255, 45, 149, 0.6);
+        }
+
+        .eurovision-popup {
+            background: var(--pop-bg) !important;
+            color: #f3f4f6 !important;
+            border: 1px solid var(--pop-line) !important;
+            border-radius: 24px !important;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.95), 0 0 35px rgba(255, 45, 149, 0.25) !important;
+        }
+        .eurovision-popup input, .eurovision-popup select {
+            background: var(--pop-card) !important;
+            border: 1px solid #232a3c !important;
+            color: #ffffff !important;
+            border-radius: 12px !important;
+        }
+        .eurovision-popup input:focus, .eurovision-popup select:focus {
+            outline: 2px solid var(--pop-pink) !important;
+            border-color: var(--pop-pink) !important;
+        }
+
+        .btn-pop-pink {
+            background: #9e134c !important;
+            border: 1px solid var(--pop-pink) !important;
+            color: #ffffff !important;
+            font-family: var(--font-display) !important;
+            font-weight: 700 !important;
+            border-radius: 999px !important;
+            transition: all 0.2s ease !important;
+        }
+        .btn-pop-pink:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 18px rgba(255,45,149,.4) !important;
+            background: var(--pop-pink) !important;
+        }
+        .btn-pop-ghost {
+            background: transparent !important;
+            border: 1px solid #2a3246 !important;
+            color: #9ca3af !important;
+            border-radius: 999px !important;
+            transition: all 0.2s ease !important;
+        }
+        .btn-pop-ghost:hover {
+            color: #ffffff !important;
+            border-color: var(--pop-pink) !important;
+            background: rgba(255, 45, 149, 0.15) !important;
+        }
+
+        .flag-chip-btn {
+            background: #121622;
+            border: 1px solid #232a3c;
+            color: #ffffff;
+            border-radius: 8px;
+            padding: 5px 9px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .flag-chip-btn:hover {
+            border-color: var(--pop-pink);
+            background: rgba(255, 45, 149, 0.25);
+            color: var(--pop-gold);
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #07080b; }
+        ::-webkit-scrollbar-thumb { background: #232834; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--pop-pink); }
+    </style>
+</head>
+<body id="mainBody" class="p-2 sm:p-4 flex flex-col justify-between min-h-screen w-full">
+
+    <!-- HEADER BAR -->
+    <header class="w-full mb-4 z-50 relative">
+        <div class="bg-[#101218] p-3 sm:p-4 rounded-2xl border border-[#232834] flex flex-wrap items-center justify-between gap-3 shadow-2xl">
+            
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-br from-pink-600 to-purple-800 p-2.5 rounded-xl text-white shadow-lg border border-pink-500/30">
+                    <i class="fas fa-truck-moving text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-black tracking-wider uppercase text-white font-['Outfit']">
+                        FAHRPLAN <span class="text-[#ff2d95]">GRUMPANY</span>
+                    </h1>
+                    <p class="text-[11px] text-gray-400 font-medium">Poki & Tabi Tourenplanung • Monatsübersicht</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button type="button" id="btnToggleDeco" onclick="toggleDecoMode()" class="btn-pop-ghost text-xs px-3.5 py-1.5 flex items-center gap-1.5 font-bold">
+                    <i class="fas fa-paint-brush text-[#ffd166]"></i>
+                    <span id="lblDecoMode">🎨 Dekorieren: AUS</span>
+                </button>
+                <button type="button" onclick="openModal('modalCompanies')" class="btn-pop-pink text-xs px-3.5 py-1.5 flex items-center gap-1.5 font-bold shadow">
+                    <i class="fas fa-building text-[#ffd166]"></i>
+                    <span>Firmen</span>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-2 bg-[#08090c] p-1.5 rounded-xl border border-[#232834]">
+                <div class="flex items-center gap-1.5 px-2">
+                    <i class="fas fa-calendar-check text-[#ffd166] text-xs"></i>
+                    <span class="text-xs font-bold text-gray-400 uppercase font-['Outfit'] hidden sm:inline">Jahr:</span>
+                    <select id="yearSelect" onchange="switchYear(this.value)" class="bg-[#181c24] text-[#ffd166] font-bold font-mono text-sm border border-[#2d3545] rounded-lg px-2.5 py-1 focus:outline-none cursor-pointer">
+                    </select>
+                </div>
+                
+                <button onclick="scrollToToday()" class="btn-pop-pink text-xs px-3 py-1.5 flex items-center gap-1.5 shadow" title="Springe zum heutigen Tag">
+                    <i class="fas fa-crosshairs text-[#ffd166]"></i>
+                    <span>Heute</span>
+                </button>
+
+                <button onclick="openModal('modalAddYear')" class="btn-pop-ghost text-xs px-3 py-1.5 flex items-center gap-1 font-bold">
+                    <i class="fas fa-plus-circle text-[#ffd166]"></i>
+                    <span>Jahr +</span>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-1.5 bg-[#08090c] p-1.5 rounded-xl border border-[#232834] text-xs">
+                <button onclick="prevKW()" class="btn-pop-ghost px-2.5 py-1 font-bold"><i class="fas fa-chevron-left text-[#ffd166]"></i></button>
+                <select id="kwSelect" onchange="scrollToKW(this.value)" class="bg-[#181c24] text-white font-mono font-bold px-2 py-1 rounded-lg border border-[#2d3545] focus:outline-none cursor-pointer text-xs">
+                </select>
+                <button onclick="nextKW()" class="btn-pop-ghost px-2.5 py-1 font-bold"><i class="fas fa-chevron-right text-[#ffd166]"></i></button>
+            </div>
+
+            <div class="flex items-center gap-2 text-xs">
+                <button onclick="exportJSON()" class="btn-pop-ghost px-2.5 py-1.5 flex items-center gap-1 font-bold" title="JSON Export">
+                    <i class="fas fa-download text-blue-400"></i> <span class="hidden lg:inline">Export</span>
+                </button>
+                <label class="btn-pop-ghost px-2.5 py-1.5 flex items-center gap-1 font-bold cursor-pointer" title="JSON Import">
+                    <i class="fas fa-upload text-emerald-400"></i> <span class="hidden lg:inline">Import</span>
+                    <input type="file" id="jsonInput" accept=".json" class="hidden" onchange="importJSON(event)">
+                </label>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- FREIE STICKER EBENE -->
+    <div id="stickersLayer" class="absolute inset-0 pointer-events-none overflow-hidden" style="height: 100%;"></div>
+
+    <!-- MAIN CONTAINER -->
+    <main id="fahrplanContainer" class="w-full space-y-12 flex-grow overflow-x-auto pb-4 relative z-10">
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="w-full mt-12 text-center text-xs text-gray-500 py-3 border-t border-[#1a1e28] flex justify-between items-center px-2 relative z-10">
+        <p>Fahrplan Grumpany • Tabi (Neucha) & Poki (Kulim Park)</p>
+        <p class="font-mono text-[10px] text-gray-600">Frei verschiebbare Sticker & GIFs aktiv</p>
+    </footer>
+
+
+    <!-- ========================================================= -->
+    <!-- MODAL: DEKO / STICKER HINZUFÜGEN                          -->
+    <!-- ========================================================= -->
+
+    <div id="modalAddSticker" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="eurovision-popup w-full max-w-md p-6 border space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b border-[#222838]">
+                <h3 class="text-xl font-bold font-['Outfit'] text-[#ffd166] uppercase flex items-center gap-2">
+                    <i class="fas fa-image text-[#ff2d95]"></i>
+                    <span>Sticker / Deko einfügen</span>
+                </h3>
+                <button onclick="closeModal('modalAddSticker')" class="text-gray-400 hover:text-white text-base w-7 h-7 rounded-full hover:bg-[#121622] flex items-center justify-center"><i class="fas fa-times"></i></button>
+            </div>
+            <p class="text-xs text-gray-400">Wähle ein Bild, GIF oder Spinnennetz/Kürbis von deinem PC. Danach kannst du es frei auf der Seite verschieben und in der Größe anpassen!</p>
+            
+            <div>
+                <label class="block text-xs text-[#ffd166] mb-1 font-bold font-['Outfit'] uppercase">Bild-Datei (PNG, JPG, GIF)</label>
+                <input type="file" id="stickerFileinput" accept="image/*" class="w-full p-2.5 text-xs text-white cursor-pointer bg-[#111520] rounded-xl border border-[#222838]">
+            </div>
+
+            <div class="pt-3 border-t border-[#222838] flex justify-end gap-2">
+                <button onclick="closeModal('modalAddSticker')" class="btn-pop-ghost text-xs px-4 py-2">Abbrechen</button>
+                <button onclick="confirmAddSticker()" class="btn-pop-pink font-bold text-xs px-5 py-2 shadow">Sticker hinzufügen</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- MODAL: FIRMEN VERWALTUNG                                  -->
+    <!-- ========================================================= -->
+
+    <div id="modalCompanies" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="eurovision-popup w-full max-w-2xl p-6 border space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b border-[#222838]">
+                <h3 class="text-xl font-bold font-['Outfit'] text-[#ffd166] uppercase flex items-center gap-2">
+                    <i class="fas fa-building text-[#ff2d95]"></i>
+                    <span>ETS 2 Firmen Logos verwalten</span>
+                </h3>
+                <button onclick="closeModal('modalCompanies')" class="text-gray-400 hover:text-white text-base w-7 h-7 rounded-full hover:bg-[#121622] flex items-center justify-center"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="companiesListContainer" class="max-h-[60vh] overflow-y-auto space-y-2.5 pr-2"></div>
+            <div class="pt-3 border-t border-[#222838] flex justify-end">
+                <button onclick="closeModal('modalCompanies')" class="btn-pop-pink text-xs px-6 py-2">Fertig</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- ROUTEN BEARBEITEN POP-UP                                  -->
+    <!-- ========================================================= -->
+
+    <div id="modalEditFahrt" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="eurovision-popup w-full max-w-xl p-6 overflow-hidden border">
+            
+            <div class="pb-3 border-b border-[#222838] flex justify-between items-center mb-5">
+                <div>
+                    <div class="text-[11px] text-gray-400 uppercase font-bold tracking-wider">Fahrt eintragen</div>
+                    <h3 class="text-xl font-bold font-limelight-style text-[#ffd166] uppercase" id="modalFahrtTitle">Montag, 09.02.2026</h3>
+                </div>
+                
+                <button id="btnToggleFrei" type="button" onclick="toggleFreiState()" class="px-4 py-2 rounded-full font-bold text-xs transition-all flex items-center gap-2 border bg-[#1c2230] text-gray-300 border-[#2a3246]">
+                    <i class="fas fa-coffee text-amber-400"></i>
+                    <span id="lblFrei">FREI: AUS</span>
+                </button>
+            </div>
+
+            <div class="space-y-4 max-h-[75vh] overflow-y-auto pr-1 text-xs">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-[#111520] p-3 rounded-xl border border-[#222838]">
+                        <label class="block text-[#ffd166] font-bold mb-1 font-['Outfit'] uppercase text-[11px]">Emoji Feld (Links)</label>
+                        <input type="text" id="editDayEmoji" class="w-full p-2 text-white font-bold text-center text-lg" placeholder="🌴">
+                    </div>
+                    <div class="bg-[#111520] p-3 rounded-xl border border-[#222838]">
+                        <label class="block text-[#ffd166] font-bold mb-1 font-['Outfit'] uppercase text-[11px]">Fahrer (Rechts: P/T)</label>
+                        <input type="text" id="editDayBadge" class="w-full p-2 text-white font-bold text-center text-lg uppercase" placeholder="P" maxlength="3">
+                    </div>
+                </div>
+
+                <div class="bg-[#111520] p-3 rounded-xl border border-[#222838]">
+                    <label class="block text-[#ffd166] font-bold mb-1 font-['Outfit'] uppercase">Schriftart für diesen Tag</label>
+                    <select id="editDayCustomFont" class="w-full p-2 text-white font-bold cursor-pointer">
+                        <option value="">Automatisch (nach Wochenfahrer)</option>
+                        <option value="Neucha">Neucha (Tabi Handschrift)</option>
+                        <option value="Kulim Park">Kulim Park (Poki Clean)</option>
+                        <option value="Outfit">Outfit (Modern Display)</option>
+                        <option value="Plus Jakarta Sans">Plus Jakarta Sans (Standard)</option>
+                    </select>
+                </div>
+
+                <div id="routeFieldsContainer" class="space-y-3.5">
+                    <div class="bg-[#111520] p-3 rounded-xl border border-[#222838] relative">
+                        <label class="block text-[#ffd166] text-[11px] font-bold uppercase mb-1 font-['Outfit']">Startort & Flagge</label>
+                        <div class="grid grid-cols-4 gap-2 relative">
+                            <input type="text" id="editStartCity" class="col-span-3 p-2.5 text-white font-bold text-sm" placeholder="Startort">
+                            <div class="relative">
+                                <input type="text" id="editStartFlag" onfocus="openFlagDropdown('start')" oninput="filterFlagDropdown('start')" class="w-full p-2.5 text-center text-lg font-bold cursor-pointer border-2 border-[#ff2d95]" placeholder="🇮🇹">
+                                <div id="startFlagDropdown" class="hidden absolute right-0 top-12 w-56 max-h-48 overflow-y-auto bg-[#121622] border border-[#32195f] rounded-xl shadow-2xl z-50 p-1 space-y-1"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#111520] p-3 rounded-xl border border-[#222838] relative">
+                        <label class="block text-[#ff2d95] text-[11px] font-bold uppercase mb-1 font-['Outfit']">Zielort & Flagge</label>
+                        <div class="grid grid-cols-4 gap-2 relative">
+                            <input type="text" id="editDestCity" class="col-span-3 p-2.5 text-white font-bold text-sm" placeholder="Zielort">
+                            <div class="relative">
+                                <input type="text" id="editDestFlag" onfocus="openFlagDropdown('dest')" oninput="filterFlagDropdown('dest')" class="w-full p-2.5 text-center text-lg font-bold cursor-pointer border-2 border-blue-500" placeholder="🇷🇸">
+                                <div id="destFlagDropdown" class="hidden absolute right-0 top-12 w-56 max-h-48 overflow-y-auto bg-[#121622] border border-[#32195f] rounded-xl shadow-2xl z-50 p-1 space-y-1"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-gray-400 mb-1 font-semibold">Routendauer</label>
+                            <input type="text" id="editDuration" class="w-full p-2.5 text-white font-bold" placeholder="Dauer">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 mb-1 font-semibold">Liefergut</label>
+                            <input type="text" id="editCargo" class="w-full p-2.5 text-white font-bold" placeholder="Liefergut">
+                        </div>
+                    </div>
+
+                    <div class="bg-[#111520] p-3 rounded-xl border border-[#222838] space-y-3">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-gray-400 mb-1 font-semibold">Absender Firma</label>
+                                <select id="editStartComp" class="w-full p-2.5 text-white font-bold cursor-pointer"><option value="">-- Keine Firma --</option></select>
+                            </div>
+                            <div>
+                                <label class="block text-gray-400 mb-1 font-semibold">Empfänger Firma</label>
+                                <select id="editDestComp" class="w-full p-2.5 text-white font-bold cursor-pointer"><option value="">-- Keine Firma --</option></select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 mt-5 border-t border-[#222838] flex justify-end gap-3">
+                <button onclick="closeModal('modalEditFahrt')" class="btn-pop-ghost text-xs px-5 py-2.5">Abbrechen</button>
+                <button onclick="saveFahrtModal()" class="btn-pop-pink text-xs px-6 py-2.5 shadow-lg">Speichern & Anwenden</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MODAL: JAHR HINZUFÜGEN -->
+    <div id="modalAddYear" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="eurovision-popup w-full max-w-md p-6 border space-y-4">
+            <h3 class="text-xl font-bold font-['Outfit'] text-white uppercase flex items-center gap-2">
+                <i class="fas fa-calendar-plus text-[#ff2d95]"></i><span>Neues Jahr hinzufügen</span>
+            </h3>
+            <div>
+                <label class="block text-xs text-[#ffd166] mb-1 font-bold font-['Outfit'] uppercase">Jahreszahl</label>
+                <input type="number" id="inputNewYear" class="w-full p-3 text-[#ffd166] font-mono text-xl font-bold" placeholder="2026" min="2020" max="2035">
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeModal('modalAddYear')" class="btn-pop-ghost text-xs px-4 py-2">Abbrechen</button>
+                <button onclick="createNewYearConfirm()" class="btn-pop-pink font-bold text-xs px-5 py-2 shadow">Jahr generieren</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MODAL: BANNER -->
+    <div id="modalAddBanner" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="eurovision-popup w-full max-w-md p-5 border">
+            <div class="pb-3 border-b border-[#222838] flex justify-between items-center mb-3">
+                <h3 class="text-base font-bold font-['Outfit'] text-white uppercase" id="bannerModalTitle">Banner eintragen</h3>
+                <button onclick="closeModal('modalAddBanner')" class="text-gray-400 hover:text-white text-base w-7 h-7 rounded-full hover:bg-[#121622] flex items-center justify-center"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-gray-400 mb-1 font-bold font-['Outfit'] uppercase">Banner-Text</label>
+                    <input type="text" id="bannerText" class="w-full p-2 text-white font-bold text-xs mb-2" placeholder="Promods Streik">
+                    <div class="flex flex-wrap gap-1">
+                        <button type="button" onclick="setBannerText('Promods Streik')" class="flag-chip-btn">Promods Streik</button>
+                        <button type="button" onclick="setBannerText('Urlaub in Italien')" class="flag-chip-btn">Urlaub in Italien</button>
+                        <button type="button" onclick="setBannerText('Streik beendet')" class="flag-chip-btn">Streik beendet</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-1 font-bold font-['Outfit'] uppercase">Position</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" id="btnPosTop" onclick="setBannerPos('top')" class="btn-pop-pink py-2 text-xs flex items-center justify-center gap-1.5"><i class="fas fa-arrow-up"></i> Oben</button>
+                        <button type="button" id="btnPosBottom" onclick="setBannerPos('bottom')" class="btn-pop-ghost py-2 text-xs flex items-center justify-center gap-1.5"><i class="fas fa-arrow-down"></i> Unten</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2.5 bg-[#111520] p-2.5 rounded-xl border border-[#222838]">
+                    <div>
+                        <label class="block text-gray-400 mb-1 font-semibold">Start Tag</label>
+                        <select id="bannerStartDay" class="w-full p-2 text-white font-bold"><option value="0">Montag</option><option value="1">Dienstag</option><option value="2">Mittwoch</option><option value="3">Donnerstag</option><option value="4">Freitag</option><option value="5">Samstag</option><option value="6">Sonntag</option></select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 mb-1 font-semibold">End Tag</label>
+                        <select id="bannerEndDay" class="w-full p-2 text-white font-bold"><option value="0">Montag</option><option value="1">Dienstag</option><option value="2">Mittwoch</option><option value="3">Donnerstag</option><option value="4" selected>Freitag</option><option value="5">Samstag</option><option value="6">Sonntag</option></select>
+                    </div>
+                </div>
+            </div>
+            <div class="pt-3 mt-4 border-t border-[#222838] flex justify-between items-center">
+                <button type="button" id="btnDeleteBanner" onclick="deleteBannerModal()" class="bg-red-900/60 hover:bg-red-800 text-red-200 text-xs px-3 py-1.5 rounded-full border border-red-500 hidden"><i class="fas fa-trash mr-1"></i> Löschen</button>
+                <div class="flex gap-2 ml-auto">
+                    <button onclick="closeModal('modalAddBanner')" class="btn-pop-ghost text-xs px-4 py-2">Abbrechen</button>
+                    <button onclick="saveBannerModal()" class="btn-pop-pink font-bold text-xs px-5 py-2 shadow">Speichern</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOASTS -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+
+    <!-- JAVASCRIPT -->
+    <script>
+        const WEEKDAYS = ["MONTAG", "DIENSTAG", "MITTWOCH", "DONNERSTAG", "FREITAG", "SAMSTAG", "SONNTAG"];
+        const MONTH_NAMES = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+        const DRIVER_OPTIONS = ["TABI", "POKI", "URLAUB", "X"];
+
+        const ETS2_COMPANIES = [
+            "ITCC", "LKW LOG", "TRADEAUX", "EUROGOODIES", "TRANSINET", 
+            "TRAMERI", "STOKES", "SANBUILDERS", "POSPED", "TREE-ET", 
+            "BCP", "NBFC", "WGCC", "ARIA", "CHIMEX", "FARM", "NS OIL", "QUARRY", "SELLPLAN"
+        ];
+
+        const FLAG_DATABASE = [
+            { code: "DE", name: "Deutschland", flag: "🇩🇪" }, { code: "AT", name: "Österreich", flag: "🇦🇹" },
+            { code: "CH", name: "Schweiz", flag: "🇨🇭" }, { code: "IT", name: "Italien", flag: "🇮🇹" },
+            { code: "FR", name: "Frankreich", flag: "🇫🇷" }, { code: "NL", name: "Niederlande", flag: "🇳🇱" },
+            { code: "BE", name: "Belgien", flag: "🇧🇪" }, { code: "LU", name: "Luxemburg", flag: "🇱🇺" },
+            { code: "PL", name: "Polen", flag: "🇵🇱" }, { code: "CZ", name: "Tschechien", flag: "🇨🇿" },
+            { code: "SK", name: "Slowakei", flag: "🇸🇰" }, { code: "HU", name: "Ungarn", flag: "🇭🇺" },
+            { code: "DK", name: "Dänemark", flag: "🇩🇰" }, { code: "SE", name: "Schweden", flag: "🇸🇪" },
+            { code: "NO", name: "Norwegen", flag: "🇳🇴" }, { code: "FI", name: "Finnland", flag: "🇫🇮" },
+            { code: "GB", name: "Großbritannien", flag: "🇬🇧" }, { code: "IE", name: "Irland", flag: "IE" },
+            { code: "ES", name: "Spanien", flag: "🇪🇸" }, { code: "PT", name: "Portugal", flag: "🇵🇹" },
+            { code: "RO", name: "Rumänien", flag: "🇷🇴" }, { code: "BG", name: "Bulgarien", flag: "🇧🇬" },
+            { code: "GR", name: "Griechenland", flag: "🇬🇷" }, { code: "HR", name: "Kroatien", flag: "🇭🇷" },
+            { code: "RS", name: "Serbien", flag: "🇷🇸" }, { code: "BA", name: "Bosnien", flag: "🇧🇦" },
+            { code: "SI", name: "Slowenien", flag: "🇸🇮" }, { code: "MK", name: "Nordmazedonien", flag: "🇲🇰" },
+            { code: "AL", name: "Albanien", flag: "🇦🇱" }, { code: "TR", name: "Türkei", flag: "🇹🇷" },
+            { code: "CLEAR", name: "Keine Flagge", flag: "❌" }
+        ];
+
+        let store = {};
+        let globalMonthImages = {}; 
+        let companyLogos = {}; 
+        let stickersList = []; // Freie Sticker { id, src, x, y, width }
+        let activeYear = null;
+        let isDecoMode = false;
+
+        let editTarget = { mIdx: null, wIdx: null, dIdx: null };
+        let activeIsFrei = false;
+        let editBannerTarget = { mIdx: null, wIdx: null, bannerId: null };
+        let activeBannerPos = "top";
+        let activeBannerColor = "#cc0000";
+        let activeBannerTextColor = "#ffffff";
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadStoreFromStorage();
+            const curYear = new Date().getFullYear();
+            if (Object.keys(store).length === 0) {
+                store[curYear] = generateCalendarYear(curYear);
+            }
+            activeYear = Object.keys(store).length > 0 ? parseInt(Object.keys(store)[0], 10) : curYear;
+            if (!store[activeYear]) store[activeYear] = generateCalendarYear(activeYear);
+            
+            saveStoreToStorage();
+            setupYearDropdown();
+            renderCompaniesManagerUI();
+            renderFahrplan();
+            renderStickers();
+        });
+
+        function loadStoreFromStorage() {
+            try {
+                const saved = localStorage.getItem("ets_fahrplan_permanent_v32");
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    store = parsed.store || {};
+                    globalMonthImages = parsed.globalMonthImages || {};
+                    companyLogos = parsed.companyLogos || {};
+                    stickersList = parsed.stickersList || [];
+                }
+            } catch(e) { store = {}; globalMonthImages = {}; companyLogos = {}; stickersList = []; }
+        }
+
+        function saveStoreToStorage() {
+            try {
+                const payload = {
+                    store: store,
+                    globalMonthImages: globalMonthImages,
+                    companyLogos: companyLogos,
+                    stickersList: stickersList
+                };
+                localStorage.setItem("ets_fahrplan_permanent_v32", JSON.stringify(payload));
+            } catch(e) { showToast("Fehler beim Speichern!", "error"); }
+        }
+
+        function toggleDecoMode() {
+            isDecoMode = !isDecoMode;
+            const body = document.getElementById("mainBody");
+            const btn = document.getElementById("btnToggleDeco");
+            const lbl = document.getElementById("lblDecoMode");
+
+            if (isDecoMode) {
+                body.classList.add("deco-mode-active");
+                btn.className = "btn-pop-pink text-xs px-3.5 py-1.5 flex items-center gap-1.5 font-bold shadow";
+                lbl.textContent = "🎨 Dekorieren: AN (+ Sticker)";
+                openModal('modalAddSticker');
+            } else {
+                body.classList.remove("deco-mode-active");
+                btn.className = "btn-pop-ghost text-xs px-3.5 py-1.5 flex items-center gap-1.5 font-bold";
+                lbl.textContent = "🎨 Dekorieren: AUS";
+            }
+            renderStickers();
+        }
+
+        function confirmAddSticker() {
+            const fileInput = document.getElementById("stickerFileinput");
+            const file = fileInput.files[0];
+            if (!file) { showToast("Bitte wähle ein Bild aus!", "error"); return; }
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const newSticker = {
+                    id: 'stk_' + Date.now(),
+                    src: evt.target.result,
+                    x: 100 + (stickersList.length * 20),
+                    y: 200 + (stickersList.length * 20),
+                    width: 180
+                };
+                stickersList.push(newSticker);
+                saveStoreToStorage();
+                renderStickers();
+                closeModal('modalAddSticker');
+                fileInput.value = "";
+                showToast("Sticker hinzugefügt! Einfach mit der Maus verschieben.", "success");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderStickers() {
+            const layer = document.getElementById("stickersLayer");
+            if (!layer) return;
+            layer.innerHTML = "";
+
+            if (isDecoMode) {
+                layer.style.pointerEvents = "auto";
+            } else {
+                layer.style.pointerEvents = "none";
+            }
+
+            stickersList.forEach(stk => {
+                const el = document.createElement("div");
+                el.className = "free-sticker";
+                el.style.left = stk.x + "px";
+                el.style.top = stk.y + "px";
+                el.style.width = stk.width + "px";
+
+                el.innerHTML = `
+                    <div class="sticker-controls">
+                        <button onclick="resizeSticker('${stk.id}', -20)" class="px-1 bg-black/85 rounded text-white font-bold">-</button>
+                        <span>Größe</span>
+                        <button onclick="resizeSticker('${stk.id}', 20)" class="px-1 bg-black/85 rounded text-white font-bold">+</button>
+                        <button onclick="deleteSticker('${stk.id}')" class="px-1 bg-red-900 text-white rounded ml-2">Löschen</button>
+                    </div>
+                    <img src="${stk.src}" class="w-full h-auto object-contain pointer-events-none drop-shadow-2xl" alt="Sticker">
+                `;
+
+                // Drag & Drop
+                let isDragging = false;
+                let startX, startY;
+
+                el.onmousedown = (e) => {
+                    if (!isDecoMode) return;
+                    if (e.target.tagName === 'BUTTON') return;
+                    isDragging = true;
+                    startX = e.clientX - stk.x;
+                    startY = e.clientY - stk.y;
+                    e.stopPropagation();
+                };
+
+                document.onmousemove = (e) => {
+                    if (!isDragging) return;
+                    stk.x = e.clientX - startX;
+                    stk.y = e.clientY - startY;
+                    el.style.left = stk.x + "px";
+                    el.style.top = stk.y + "px";
+                };
+
+                document.onmouseup = () => {
+                    if (isDragging) {
+                        isDragging = false;
+                        saveStoreToStorage();
+                    }
+                };
+
+                layer.appendChild(el);
+            });
+        }
+
+        function resizeSticker(id, delta) {
+            const stk = stickersList.find(s => s.id === id);
+            if (!stk) return;
+            stk.width = Math.max(50, stk.width + delta);
+            saveStoreToStorage();
+            renderStickers();
+        }
+
+        function deleteSticker(id) {
+            stickersList = stickersList.filter(s => s.id !== id);
+            saveStoreToStorage();
+            renderStickers();
+            showToast("Sticker gelöscht", "info");
+        }
+
+        function setupYearDropdown() {
+            const sel = document.getElementById("yearSelect");
+            if (!sel) return;
+            sel.innerHTML = "";
+            const years = Object.keys(store).map(Number).sort((a,b) => a - b);
+            years.forEach(y => {
+                const opt = document.createElement("option");
+                opt.value = y;
+                opt.innerText = y;
+                if (y === activeYear) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        }
+
+        function switchYear(yVal) {
+            if (!yVal) return;
+            activeYear = parseInt(yVal, 10);
+            if (!store[activeYear]) store[activeYear] = generateCalendarYear(activeYear);
+            renderFahrplan();
+            showToast(`Jahr ${activeYear} geladen`, "info");
+        }
+
+        function createNewYearConfirm() {
+            const yInput = parseInt(document.getElementById("inputNewYear").value, 10);
+            if (!yInput || yInput < 2000 || yInput > 2050) { showToast("Ungültiges Jahr!", "error"); return; }
+            if (!store[yInput]) store[yInput] = generateCalendarYear(yInput);
+            activeYear = yInput;
+            saveStoreToStorage();
+            setupYearDropdown();
+            closeModal("modalAddYear");
+            renderFahrplan();
+            showToast(`Jahr ${yInput} erfolgreich generiert!`, "success");
+        }
+
+        function generateCalendarYear(year) {
+            const months = [];
+            for (let m = 0; m < 12; m++) {
+                const firstDay = new Date(year, m, 1);
+                const lastDay = new Date(year, m + 1, 0);
+                let kwCounter = getISOWeek(firstDay);
+                const monthWeeks = [];
+                let currDate = new Date(firstDay);
+                let dayOfWeek = currDate.getDay() || 7; 
+                currDate.setDate(currDate.getDate() - (dayOfWeek - 1));
+
+                while (currDate <= lastDay || currDate.getDay() !== 1) {
+                    const weekDays = [];
+                    for (let d = 0; d < 7; d++) {
+                        if (currDate.getMonth() === m && currDate.getFullYear() === year) {
+                            const dateStr = `${String(currDate.getDate()).padStart(2, '0')}.${String(currDate.getMonth() + 1).padStart(2, '0')}.`;
+                            const isoStr = `${currDate.getFullYear()}-${String(currDate.getMonth() + 1).padStart(2, '0')}-${String(currDate.getDate()).padStart(2, '0')}`;
+                            weekDays.push({
+                                date: dateStr, fullDate: isoStr, isFrei: false,
+                                startCity: "", startFlag: "", destCity: "", destFlag: "",
+                                duration: "", cargo: "", startComp: "", destComp: "", customFont: "",
+                                dayEmoji: "", dayBadge: ""
+                            });
+                        } else {
+                            weekDays.push(null);
+                        }
+                        currDate.setDate(currDate.getDate() + 1);
+                    }
+                    monthWeeks.push({ kwNumber: kwCounter, driverLeft: "TABI", driverRight: "POKI", topBanners: [], bottomBanners: [], days: weekDays });
+                    kwCounter++;
+                    if (currDate > lastDay && currDate.getDay() === 1) break;
+                }
+                months.push({ monthIdx: m, monthName: MONTH_NAMES[m], weeks: monthWeeks });
+            }
+            return months;
+        }
+
+        function getISOWeek(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+        }
+
+        function renderFahrplan() {
+            const container = document.getElementById("fahrplanContainer");
+            if (!container) return;
+            container.innerHTML = "";
+
+            const yearData = store[activeYear];
+            if (!yearData) return;
+
+            populateKWDropdown(yearData);
+
+            yearData.forEach((month, mIdx) => {
+                const monthBlock = document.createElement("div");
+                monthBlock.className = "space-y-4";
+
+                const customImg = globalMonthImages[month.monthName];
+                let headerContentHtml = `<h2 class="text-3xl sm:text-4xl font-black font-limelight-style text-[#ffd166] uppercase tracking-wider text-center drop-shadow-lg">${month.monthName} ${activeYear}</h2>`;
+                if (customImg) {
+                    headerContentHtml = `<div class="flex justify-center"><img src="${customImg}" class="max-h-20 sm:max-h-24 object-contain" alt="${month.monthName}"></div>`;
+                }
+
+                monthBlock.innerHTML = `
+                    <div class="border-b-2 border-[#232834] pb-4 pt-6 relative flex flex-col items-center justify-center space-y-2">
+                        <div class="w-full text-center">${headerContentHtml}</div>
+                        <div class="absolute right-0 top-6 flex items-center gap-2">
+                            <label class="btn-pop-ghost text-xs px-3 py-1.5 cursor-pointer flex items-center gap-1.5" title="Schriftbild für ${month.monthName} hochladen">
+                                <i class="fas fa-image text-[#ffd166]"></i>
+                                <span class="hidden sm:inline">Schriftbild wählen</span>
+                                <input type="file" accept="image/*" class="hidden" onchange="handleMonthHeaderUpload('${month.monthName}', event)">
+                            </label>
+                        </div>
+                    </div>
+                `;
+
+                month.weeks.forEach((week, wIdx) => {
+                    const weekBox = document.createElement("div");
+                    weekBox.id = `kw-block-${week.kwNumber}`;
+                    weekBox.className = "w-full space-y-2";
+
+                    const grid = document.createElement("div");
+                    grid.className = "w-full grid gap-2 items-stretch";
+                    grid.style.gridTemplateColumns = "30px repeat(7, minmax(0, 1fr)) 30px";
+
+                    const dummyL = document.createElement("div");
+                    dummyL.style.gridColumn = "1";
+                    grid.appendChild(dummyL);
+
+                    WEEKDAYS.forEach((dayName, idx) => {
+                        const hasDay = week.days[idx] !== null;
+                        const h = document.createElement("div");
+                        h.style.gridColumn = `${idx + 2}`;
+
+                        if (hasDay) {
+                            h.className = "text-white text-center py-0.5 text-xs font-bold font-limelight-style uppercase relative flex items-center justify-center bg-[#141822]/80 border border-[#232a3c]/60 rounded-md shadow-sm";
+                            if (idx === 0) {
+                                h.innerHTML = `
+                                    <div class="absolute left-1 top-0 bottom-0 flex items-center z-10">
+                                        <button onclick="openAddBannerModal(${mIdx}, ${wIdx})" class="px-1.5 py-0 bg-[#ff2d95] hover:bg-pink-600 text-white rounded text-[10px] font-jost-style font-black flex items-center gap-0.5 transition shadow" title="Banner hinzufügen">
+                                            <span>KW${week.kwNumber}</span><i class="fas fa-plus text-[8px]"></i>
+                                        </button>
+                                    </div>
+                                    <span class="pl-12">${dayName}</span>
+                                `;
+                            } else {
+                                h.innerText = dayName;
+                            }
+                        }
+                        grid.appendChild(h);
+                    });
+
+                    const dummyR = document.createElement("div");
+                    dummyR.style.gridColumn = "9";
+                    grid.appendChild(dummyR);
+
+                    if (week.topBanners && week.topBanners.length > 0) {
+                        week.topBanners.forEach(b => {
+                            const startCol = parseInt(b.startDayIdx, 10) + 2;
+                            const endCol = parseInt(b.endDayIdx, 10) + 3;
+                            const bannerEl = document.createElement("div");
+                            bannerEl.className = "banner-item py-1 px-3 rounded-lg text-center uppercase shadow truncate my-0.5 flex items-center justify-center";
+                            bannerEl.style.gridColumn = `${startCol} / ${endCol}`;
+                            bannerEl.style.backgroundColor = b.color || "#cc0000";
+                            bannerEl.style.color = b.textColor || "#ffffff";
+                            bannerEl.onclick = () => openEditBannerModal(mIdx, wIdx, b.id, "top");
+                            bannerEl.innerHTML = `<span class="truncate">${b.text}</span>`;
+                            grid.appendChild(bannerEl);
+                        });
+                    } else {
+                        const spacerTop = document.createElement("div");
+                        spacerTop.className = "banner-spacer my-0.5";
+                        spacerTop.style.gridColumn = "2 / 9";
+                        grid.appendChild(spacerTop);
+                    }
+
+                    const hasMonday = week.days[0] !== null;
+                    if (hasMonday) {
+                        const leftSidebar = createVerticalSidebar(week.driverLeft || "TABI", mIdx, wIdx, "left");
+                        leftSidebar.style.gridColumn = "1";
+                        grid.appendChild(leftSidebar);
+                    } else {
+                        const emptyL = document.createElement("div");
+                        emptyL.style.gridColumn = "1";
+                        grid.appendChild(emptyL);
+                    }
+
+                    week.days.forEach((day, dIdx) => {
+                        const colPos = dIdx + 2;
+                        if (!day) {
+                            const emptyCell = document.createElement("div");
+                            emptyCell.style.gridColumn = `${colPos}`;
+                            grid.appendChild(emptyCell);
+                            return;
+                        }
+
+                        const cardContainer = document.createElement("div");
+                        cardContainer.id = `day-card-${day.fullDate}`;
+
+                        let fontClass = "font-jakarta-style";
+                        const activeDriverLeft = week.driverLeft || "TABI";
+                        const activeDriverRight = week.driverRight || "POKI";
+                        let assignedDriver = dIdx < 3 ? activeDriverLeft : activeDriverRight;
+
+                        if (day.customFont) {
+                            if (day.customFont === "Neucha") fontClass = "font-tabi-style";
+                            else if (day.customFont === "Kulim Park") fontClass = "font-poki-style";
+                            else if (day.customFont === "Outfit") fontClass = "font-outfit-style";
+                        } else {
+                            if (assignedDriver === "TABI") fontClass = "font-tabi-style";
+                            else if (assignedDriver === "POKI") fontClass = "font-poki-style";
+                            else if (assignedDriver === "URLAUB" || assignedDriver === "X") fontClass = "font-outfit-style";
+                        }
+
+                        cardContainer.className = `day-card-container rounded-md text-white text-center select-none ${fontClass}`;
+                        cardContainer.style.gridColumn = `${colPos}`;
+                        cardContainer.onclick = () => openEditFahrtModal(mIdx, wIdx, dIdx);
+
+                        if (day.isFrei) {
+                            const badgeHtml = day.dayBadge ? `<div class="absolute right-2 top-2 text-xs font-black bg-black/40 px-1.5 py-0.5 rounded text-white/95">${day.dayBadge}</div>` : '';
+                            cardContainer.innerHTML = `
+                                <div class="day-block-top bg-day-${dIdx} p-2 rounded-md border border-black/60 flex flex-col items-center justify-center shadow relative">
+                                    <div class="absolute left-2 top-2 text-sm">${day.dayEmoji || ''}</div>
+                                    <div class="custom-date-size font-bold text-white/95 drop-shadow">${day.date}</div>
+                                    ${badgeHtml}
+                                </div>
+                                <div class="day-block-bottom bg-day-${dIdx} p-2 rounded-md border border-black/60 flex items-center justify-center shadow">
+                                    <span class="bg-black/85 text-white border border-white/40 font-black text-2xl px-5 py-2 rounded-md tracking-widest block shadow-2xl">FREI</span>
+                                </div>
+                            `;
+                        } else {
+                            const startFlagStr = day.startFlag ? `<span class="text-xl flex-shrink-0">${day.startFlag}</span>` : `<span class="text-white/40 text-sm font-sans">★</span>`;
+                            const destFlagStr = day.destFlag ? `<span class="text-xl flex-shrink-0">${day.destFlag}</span>` : `<span class="text-white/40 text-sm font-sans">★</span>`;
+                            const startCityStr = day.startCity || '★';
+                            const destCityStr = day.destCity || '★';
+                            const badgeHtml = day.dayBadge ? `<div class="absolute right-2 top-2 text-xs font-black bg-black/40 px-1.5 py-0.5 rounded text-white/95">${day.dayBadge}</div>` : '';
+                            
+                            const startCompRender = renderCompanyElement(day.startComp);
+                            const destCompRender = renderCompanyElement(day.destComp);
+                            const startDiamond = day.startComp ? '' : '<span class="text-white text-xs">◇</span>';
+                            const destDiamond = day.destComp ? '' : '<span class="text-white text-xs">◇</span>';
+
+                            cardContainer.innerHTML = `
+                                <div class="day-block-top bg-day-${dIdx} p-2 rounded-md border border-black/60 flex flex-col justify-between shadow relative">
+                                    <div class="absolute left-2 top-2 text-sm">${day.dayEmoji || ''}</div>
+                                    <div class="custom-date-size font-bold text-white/95 drop-shadow">${day.date}</div>
+                                    ${badgeHtml}
+                                    <div class="w-full flex items-center justify-center gap-1.5 my-0.5">
+                                        ${startFlagStr}<span class="truncate custom-city-size font-black text-white drop-shadow">${startCityStr}</span>${startFlagStr}
+                                    </div>
+                                    <div class="text-white text-sm font-black leading-none my-0">⮟</div>
+                                    <div class="w-full flex items-center justify-center gap-1.5 my-0.5">
+                                        ${destFlagStr}<span class="truncate custom-city-size font-black text-white drop-shadow">${destCityStr}</span>${destFlagStr}
+                                    </div>
+                                </div>
+
+                                <div class="day-block-bottom bg-day-${dIdx} px-2 py-1.5 rounded-md border border-black/60 flex flex-col justify-between shadow text-xs">
+                                    <div class="text-white font-bold text-center">
+                                        <span class="text-white font-extrabold text-sm mr-1">◴</span><span>${day.duration || '-'}</span>
+                                    </div>
+                                    <div class="flex items-center justify-center gap-1 font-extrabold text-white truncate">
+                                        ${startDiamond}${startCompRender}<span class="text-white font-black text-xs">➤</span>${destCompRender}${destDiamond}
+                                    </div>
+                                    <div class="text-white font-semibold text-center truncate px-1 text-[12px] opacity-95">
+                                        ${day.cargo || '-'}
+                                    </div>
+                                </div>
+                            `;
+                        }
+                        grid.appendChild(cardContainer);
+                    });
+
+                    const hasSunday = week.days[6] !== null;
+                    if (hasSunday) {
+                        const rightSidebar = createVerticalSidebar(week.driverRight || "POKI", mIdx, wIdx, "right");
+                        rightSidebar.style.gridColumn = "9";
+                        grid.appendChild(rightSidebar);
+                    } else {
+                        const emptyR = document.createElement("div");
+                        emptyR.style.gridColumn = "9";
+                        grid.appendChild(emptyR);
+                    }
+
+                    if (week.bottomBanners && week.bottomBanners.length > 0) {
+                        week.bottomBanners.forEach(b => {
+                            const startCol = parseInt(b.startDayIdx, 10) + 2;
+                            const endCol = parseInt(b.endDayIdx, 10) + 3;
+                            const bannerEl = document.createElement("div");
+                            bannerEl.className = "banner-item py-1 px-3 rounded-lg text-center uppercase shadow truncate my-0.5 flex items-center justify-center";
+                            bannerEl.style.gridColumn = `${startCol} / ${endCol}`;
+                            bannerEl.style.backgroundColor = b.color || "#cc0000";
+                            bannerEl.style.color = b.textColor || "#ffffff";
+                            bannerEl.onclick = () => openEditBannerModal(mIdx, wIdx, b.id, "bottom");
+                            bannerEl.innerHTML = `<span class="truncate">${b.text}</span>`;
+                            grid.appendChild(bannerEl);
+                        });
+                    } else {
+                        const spacerBottom = document.createElement("div");
+                        spacerBottom.className = "banner-spacer my-0.5";
+                        spacerBottom.style.gridColumn = "2 / 9";
+                        grid.appendChild(spacerBottom);
+                    }
+
+                    weekBox.appendChild(grid);
+                    monthBlock.appendChild(weekBox);
+                });
+
+                container.appendChild(monthBlock);
+            });
+        }
+
+        function createVerticalSidebar(textVal, mIdx, wIdx, side) {
+            const bar = document.createElement("div");
+            bar.className = "side-bar-vertical rounded-md flex flex-col items-center justify-center gap-2 py-4 px-1 text-white shadow h-full self-stretch";
+            bar.onclick = (e) => { e.stopPropagation(); cycleWeekDriverStatus(mIdx, wIdx, side); };
+            let charList = textVal.split('');
+            bar.innerHTML = charList.map(c => `<span class="block text-center font-['Outfit'] font-black text-base leading-none my-0.5">${c}</span>`).join('');
+            return bar;
+        }
+
+        function cycleWeekDriverStatus(mIdx, wIdx, side) {
+            const week = store[activeYear][mIdx].weeks[wIdx];
+            let currentVal = (side === 'left' ? week.driverLeft : week.driverRight) || (side === 'left' ? 'TABI' : 'POKI');
+            let curIndex = DRIVER_OPTIONS.indexOf(currentVal);
+            if (curIndex === -1) curIndex = 0;
+            let newVal = DRIVER_OPTIONS[(curIndex + 1) % DRIVER_OPTIONS.length];
+            if (side === 'left') week.driverLeft = newVal; else week.driverRight = newVal;
+            saveStoreToStorage();
+            renderFahrplan();
+            showToast(`KW ${week.kwNumber} (${side === 'left' ? 'Links' : 'Rechts'}): ${newVal}`, "success");
+        }
+
+        function handleMonthHeaderUpload(monthName, e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                globalMonthImages[monthName] = evt.target.result;
+                saveStoreToStorage();
+                renderFahrplan();
+                showToast(`Schriftbild für ${monthName} aktualisiert!`, "success");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderCompanyElement(compName) {
+            if (!compName) return ``;
+            const logoData = companyLogos[compName];
+            if (logoData) {
+                return `<img src="${logoData}" class="h-4 max-w-[60px] object-contain inline-block rounded" alt="${compName}">`;
+            }
+            return `<span class="text-white font-bold truncate max-w-[60px] text-[11px]">${compName}</span>`;
+        }
+
+        function renderCompaniesManagerUI() {
+            const container = document.getElementById("companiesListContainer");
+            if (!container) return;
+            container.innerHTML = "";
+            ETS2_COMPANIES.forEach(comp => {
+                const hasLogo = !!companyLogos[comp];
+                const row = document.createElement("div");
+                row.className = "flex items-center justify-between p-2.5 bg-[#111520] rounded-xl border border-[#222838]";
+                let previewHtml = hasLogo ? `<img src="${companyLogos[comp]}" class="h-6 max-w-[90px] object-contain rounded">` : `<span class="text-gray-500 text-xs italic">Kein Logo</span>`;
+                row.innerHTML = `
+                    <div class="font-bold text-white text-xs w-32">${comp}</div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-24 h-7 bg-[#090a0f] rounded flex items-center justify-center border border-[#232a3c]">${previewHtml}</div>
+                        <label class="btn-pop-ghost text-xs px-2.5 py-1 cursor-pointer flex items-center gap-1">
+                            <i class="fas fa-upload text-emerald-400"></i><span>PNG wählen...</span>
+                            <input type="file" accept="image/*" class="hidden" onchange="handleCompanyLogoUpload('${comp}', event)">
+                        </label>
+                        ${hasLogo ? `<button onclick="deleteCompanyLogo('${comp}')" class="text-red-400 hover:text-red-300 text-xs px-2 py-1"><i class="fas fa-trash"></i></button>` : ''}
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+            populateEditCompanyDropdowns();
+        }
+
+        function handleCompanyLogoUpload(compName, e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                companyLogos[compName] = evt.target.result;
+                saveStoreToStorage();
+                renderCompaniesManagerUI();
+                renderFahrplan();
+                showToast(`Logo für ${compName} gespeichert!`, "success");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function deleteCompanyLogo(compName) {
+            delete companyLogos[compName];
+            saveStoreToStorage();
+            renderCompaniesManagerUI();
+            renderFahrplan();
+            showToast(`Logo für ${compName} gelöscht`, "info");
+        }
+
+        function populateEditCompanyDropdowns() {
+            const selStart = document.getElementById("editStartComp");
+            const selDest = document.getElementById("editDestComp");
+            if (!selStart || !selDest) return;
+            let optionsHtml = `<option value="">-- Keine Firma --</option>`;
+            ETS2_COMPANIES.forEach(c => { optionsHtml += `<option value="${c}">${c}</option>`; });
+            selStart.innerHTML = optionsHtml;
+            selDest.innerHTML = optionsHtml;
+        }
+
+        function openFlagDropdown(type) {
+            const dropdown = document.getElementById(`${type}FlagDropdown`);
+            dropdown.classList.remove("hidden");
+            renderFlagDropdownList(type, FLAG_DATABASE);
+        }
+
+        function filterFlagDropdown(type) {
+            const query = document.getElementById(`edit${type === 'start' ? 'Start' : 'Dest'}Flag`).value.toLowerCase().trim();
+            const filtered = FLAG_DATABASE.filter(f => f.name.toLowerCase().includes(query) || f.code.toLowerCase().includes(query));
+            renderFlagDropdownList(type, filtered);
+        }
+
+        function renderFlagDropdownList(type, list) {
+            const dropdown = document.getElementById(`${type}FlagDropdown`);
+            dropdown.innerHTML = "";
+            if (list.length === 0) { dropdown.innerHTML = `<div class="p-2 text-xs text-gray-400 italic">Keine Flagge gefunden</div>`; return; }
+            list.forEach(item => {
+                const row = document.createElement("div");
+                row.className = "p-2 hover:bg-[#1f2638] rounded-lg cursor-pointer flex items-center justify-between text-xs text-white font-semibold";
+                row.onclick = () => {
+                    document.getElementById(`edit${type === 'start' ? 'Start' : 'Dest'}Flag`).value = item.flag === "❌" ? "" : item.flag;
+                    dropdown.classList.add("hidden");
+                };
+                row.innerHTML = `<span>${item.flag} ${item.name}</span> <span class="text-gray-500 text-[10px]">${item.code}</span>`;
+                dropdown.appendChild(row);
+            });
+        }
+
+        document.addEventListener("click", (e) => {
+            if (!e.target.closest("#editStartFlag") && !e.target.closest("#startFlagDropdown")) document.getElementById("startFlagDropdown")?.classList.add("hidden");
+            if (!e.target.closest("#editDestFlag") && !e.target.closest("#destFlagDropdown")) document.getElementById("destFlagDropdown")?.classList.add("hidden");
+        });
+
+        function populateKWDropdown(yearData) {
+            const sel = document.getElementById("kwSelect");
+            if (!sel) return;
+            sel.innerHTML = "";
+            yearData.forEach(m => {
+                m.weeks.forEach(w => {
+                    const opt = document.createElement("option");
+                    opt.value = w.kwNumber;
+                    opt.innerText = `KW ${w.kwNumber}`;
+                    sel.appendChild(opt);
+                });
+            });
+        }
+
+        function scrollToKW(kwNum) {
+            const el = document.getElementById(`kw-block-${kwNum}`);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function prevKW() {
+            const sel = document.getElementById("kwSelect");
+            if (sel && sel.selectedIndex > 0) { sel.selectedIndex--; scrollToKW(sel.value); }
+        }
+
+        function nextKW() {
+            const sel = document.getElementById("kwSelect");
+            if (sel && sel.selectedIndex < sel.options.length - 1) { sel.selectedIndex++; scrollToKW(sel.value); }
+        }
+
+        function scrollToToday() {
+            const now = new Date();
+            const curYear = now.getFullYear();
+            const todayISO = now.toISOString().slice(0, 10);
+            if (store[curYear] && activeYear !== curYear) { activeYear = curYear; setupYearDropdown(); renderFahrplan(); }
+            const todayCard = document.getElementById(`day-card-${todayISO}`);
+            if (todayCard) {
+                todayCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                todayCard.classList.add('ring-4', 'ring-[#ff2d95]', 'scale-105', 'z-30');
+                setTimeout(() => todayCard.classList.remove('ring-4', 'ring-[#ff2d95]', 'scale-105', 'z-30'), 3000);
+                showToast("Zum heutigen Tag gesprungen!", "success");
+            } else { showToast("Heutiger Tag im ausgewählten Jahr nicht gefunden.", "info"); }
+        }
+
+        function openEditFahrtModal(mIdx, wIdx, dIdx) {
+            editTarget = { mIdx, wIdx, dIdx };
+            const day = store[activeYear][mIdx].weeks[wIdx].days[dIdx];
+            const dateParts = day.fullDate.split("-");
+            const dObj = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+            const dayName = WEEKDAYS[(dObj.getDay() || 7) - 1];
+
+            document.getElementById("modalFahrtTitle").textContent = `${dayName}, ${day.date}${dateParts[0]}`;
+            activeIsFrei = !!day.isFrei;
+            updateFreiButtonUI();
+
+            document.getElementById("editDayEmoji").value = day.dayEmoji || "";
+            document.getElementById("editDayBadge").value = day.dayBadge || "";
+            document.getElementById("editStartCity").value = day.startCity || "";
+            document.getElementById("editStartFlag").value = day.startFlag || "";
+            document.getElementById("editDestCity").value = day.destCity || "";
+            document.getElementById("editDestFlag").value = day.destFlag || "";
+            document.getElementById("editDuration").value = day.duration || "";
+            document.getElementById("editCargo").value = day.cargo || "";
+            document.getElementById("editStartComp").value = day.startComp || "";
+            document.getElementById("editDestComp").value = day.destComp || "";
+            document.getElementById("editDayCustomFont").value = day.customFont || "";
+
+            openModal("modalEditFahrt");
+        }
+
+        function toggleFreiState() { activeIsFrei = !activeIsFrei; updateFreiButtonUI(); }
+
+        function updateFreiButtonUI() {
+            const btn = document.getElementById("btnToggleFrei");
+            const lbl = document.getElementById("lblFrei");
+            const routeContainer = document.getElementById("routeFieldsContainer");
+            if (activeIsFrei) {
+                btn.className = "px-4 py-2 rounded-full font-bold text-xs transition-all flex items-center gap-2 border bg-amber-500 text-black border-amber-400 shadow-lg";
+                lbl.textContent = "FREI: AN";
+                routeContainer.classList.add("opacity-20", "pointer-events-none");
+            } else {
+                btn.className = "px-4 py-2 rounded-full font-bold text-xs transition-all flex items-center gap-2 border bg-[#1c2230] text-gray-300 border-[#2a3246]";
+                lbl.textContent = "FREI: AUS";
+                routeContainer.classList.remove("opacity-20", "pointer-events-none");
+            }
+        }
+
+        function saveFahrtModal() {
+            const { mIdx, wIdx, dIdx } = editTarget;
+            if (mIdx === null || wIdx === null || dIdx === null) return;
+            const day = store[activeYear][mIdx].weeks[wIdx].days[dIdx];
+            if (!day) return;
+
+            day.isFrei = activeIsFrei;
+            day.dayEmoji = document.getElementById("editDayEmoji").value.trim();
+            day.dayBadge = document.getElementById("editDayBadge").value.trim().toUpperCase();
+            day.startCity = document.getElementById("editStartCity").value.trim();
+            day.startFlag = document.getElementById("editStartFlag").value.trim();
+            day.destCity = document.getElementById("editDestCity").value.trim();
+            day.destFlag = document.getElementById("editDestFlag").value.trim();
+            day.duration = document.getElementById("editDuration").value.trim();
+            day.cargo = document.getElementById("editCargo").value.trim();
+            day.startComp = document.getElementById("editStartComp").value;
+            day.destComp = document.getElementById("editDestComp").value;
+            day.customFont = document.getElementById("editDayCustomFont").value;
+
+            saveStoreToStorage();
+            renderFahrplan();
+            closeModal("modalEditFahrt");
+            showToast("Fahrt erfolgreich gespeichert!", "success");
+        }
+
+        function openAddBannerModal(mIdx, wIdx) {
+            editBannerTarget = { mIdx, wIdx, bannerId: null };
+            document.getElementById("bannerModalTitle").innerText = "Neues Banner eintragen";
+            document.getElementById("bannerText").value = "Promods Streik";
+            document.getElementById("bannerStartDay").value = "0";
+            document.getElementById("bannerEndDay").value = "4";
+            document.getElementById("btnDeleteBanner").classList.add("hidden");
+            openModal("modalAddBanner");
+        }
+
+        function openEditBannerModal(mIdx, wIdx, bannerId, pos) {
+            editBannerTarget = { mIdx, wIdx, bannerId };
+            const week = store[activeYear][mIdx].weeks[wIdx];
+            const list = pos === "top" ? (week.topBanners || []) : (week.bottomBanners || []);
+            const banner = list.find(b => b.id === bannerId);
+            if (!banner) return;
+            document.getElementById("bannerModalTitle").innerText = "Banner bearbeiten";
+            document.getElementById("bannerText").value = banner.text;
+            document.getElementById("bannerStartDay").value = banner.startDayIdx;
+            document.getElementById("bannerEndDay").value = banner.endDayIdx;
+            document.getElementById("btnDeleteBanner").classList.remove("hidden");
+            openModal("modalAddBanner");
+        }
+
+        function setBannerText(txt) { document.getElementById("bannerText").value = txt; }
+        function setBannerPos(pos) {
+            activeBannerPos = pos;
+            const btnT = document.getElementById("btnPosTop");
+            const btnB = document.getElementById("btnPosBottom");
+            if (pos === "top") {
+                btnT.className = "btn-pop-pink py-2 text-xs flex items-center justify-center gap-1.5";
+                btnB.className = "btn-pop-ghost py-2 text-xs flex items-center justify-center gap-1.5";
+            } else {
+                btnB.className = "btn-pop-pink py-2 text-xs flex items-center justify-center gap-1.5";
+                btnT.className = "btn-pop-ghost py-2 text-xs flex items-center justify-center gap-1.5";
+            }
+        }
+
+        function saveBannerModal() {
+            const { mIdx, wIdx, bannerId } = editBannerTarget;
+            if (mIdx === null || wIdx === null) return;
+            const text = document.getElementById("bannerText").value.trim();
+            if (!text) { showToast("Bitte Text eingeben!", "error"); return; }
+            const startDay = parseInt(document.getElementById("bannerStartDay").value, 10);
+            const endDay = parseInt(document.getElementById("bannerEndDay").value, 10);
+
+            const week = store[activeYear][mIdx].weeks[wIdx];
+            if (!week.topBanners) week.topBanners = [];
+            if (!week.bottomBanners) week.bottomBanners = [];
+            if (bannerId) {
+                week.topBanners = week.topBanners.filter(b => b.id !== bannerId);
+                week.bottomBanners = week.bottomBanners.filter(b => b.id !== bannerId);
+            }
+            const newBanner = { id: bannerId || 'b_' + Date.now(), text, startDayIdx: startDay, endDayIdx: endDay, color: "#cc0000", textColor: "#ffffff" };
+            if (activeBannerPos === "top") week.topBanners.push(newBanner); else week.bottomBanners.push(newBanner);
+            saveStoreToStorage();
+            renderFahrplan();
+            closeModal("modalAddBanner");
+            showToast("Banner gespeichert!", "success");
+        }
+
+        function deleteBannerModal() {
+            const { mIdx, wIdx, bannerId } = editBannerTarget;
+            if (!bannerId) return;
+            const week = store[activeYear][mIdx].weeks[wIdx];
+            week.topBanners = week.topBanners.filter(b => b.id !== bannerId);
+            week.bottomBanners = week.bottomBanners.filter(b => b.id !== bannerId);
+            saveStoreToStorage();
+            renderFahrplan();
+            closeModal("modalAddBanner");
+            showToast("Banner gelöscht", "info");
+        }
+
+        function openModal(id) { document.getElementById(id).classList.remove("hidden"); document.getElementById(id).classList.add("flex"); }
+        function closeModal(id) { document.getElementById(id).classList.add("hidden"); document.getElementById(id).classList.remove("flex"); }
+
+        function showToast(msg, type = "info") {
+            const container = document.getElementById("toastContainer");
+            if (!container) return;
+            const toast = document.createElement("div");
+            let bg = "bg-[#121622] border-[#2a3246] text-white";
+            let icon = "fa-info-circle text-blue-400";
+            if (type === "success") { bg = "bg-[#121622] border-emerald-500 text-emerald-200"; icon = "fa-check-circle text-emerald-400"; }
+            else if (type === "error") { bg = "bg-[#121622] border-red-500 text-red-200"; icon = "fa-exclamation-circle text-red-400"; }
+            toast.className = `pointer-events-auto border px-4 py-2.5 rounded-xl shadow-2xl text-xs font-bold flex items-center gap-2 transition-all duration-300 transform translate-y-2 opacity-0 ${bg}`;
+            toast.innerHTML = `<i class="fas ${icon} text-sm"></i> <span>${msg}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.remove("translate-y-2", "opacity-0"), 10);
+            setTimeout(() => { toast.classList.add("translate-y-2", "opacity-0"); setTimeout(() => toast.remove(), 300); }, 2200);
+        }
+
+        function exportJSON() {
+            const payload = { store, globalMonthImages, companyLogos, stickersList };
+            const str = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+            const a = document.createElement('a');
+            a.setAttribute("href", str);
+            a.setAttribute("download", `ETS_Fahrplan_Backup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            showToast("Backup heruntergeladen!", "success");
+        }
+
+        function importJSON(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const data = JSON.parse(evt.target.result);
+                    if (data) {
+                        store = data.store || data;
+                        globalMonthImages = data.globalMonthImages || {};
+                        companyLogos = data.companyLogos || {};
+                        stickersList = data.stickersList || [];
+                        saveStoreToStorage();
+                        setupYearDropdown();
+                        if (Object.keys(store).length > 0) activeYear = parseInt(Object.keys(store)[0], 10);
+                        renderCompaniesManagerUI();
+                        renderFahrplan();
+                        renderStickers();
+                        showToast("Backup erfolgreich geladen!", "success");
+                    }
+                } catch(err) { showToast("Fehler beim Import!", "error"); }
+            };
+            reader.readAsText(file);
+            e.target.value = "";
+        }
+    </script>
+</body>
+</html>
