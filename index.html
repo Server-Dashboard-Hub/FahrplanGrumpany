@@ -150,17 +150,15 @@
             position: absolute;
             inset: 0;
             pointer-events: none;
-            overflow: hidden;
+            overflow: visible;
             z-index: 40;
-        }
-        .deco-mode-active #stickersLayer {
-            pointer-events: auto;
         }
         .free-sticker {
             position: absolute;
             user-select: none;
             cursor: default;
             z-index: 45;
+            pointer-events: auto;
         }
         .deco-mode-active .free-sticker {
             cursor: grab;
@@ -251,7 +249,7 @@
 </head>
 <body id="mainBody" class="p-2 sm:p-4 flex flex-col justify-between min-h-screen w-full relative">
 
-    <!-- HAUPTDSMENÜ / JAHRES-AUSWAHL -->
+    <!-- HAUPTSMENÜ / JAHRES-AUSWAHL -->
     <div id="mainMenuScreen" class="fixed inset-0 bg-[#07080b] z-50 flex flex-col items-center justify-center p-4">
         <div class="eurovision-popup w-full max-w-xl p-8 text-center space-y-6 border border-[#232834]">
             <div class="bg-gradient-to-br from-pink-600 to-purple-800 p-4 rounded-2xl text-white shadow-lg inline-block border border-pink-500/30 mb-2">
@@ -860,7 +858,7 @@
                     e.stopPropagation();
                 };
 
-                document.onmousemove = (e) => {
+                const mouseMoveHandler = (e) => {
                     if (!isDragging) return;
                     stk.x = e.clientX - startX;
                     stk.y = e.clientY - startY;
@@ -868,12 +866,15 @@
                     el.style.top = stk.y + "px";
                 };
 
-                document.onmouseup = () => {
+                const mouseUpHandler = () => {
                     if (isDragging) {
                         isDragging = false;
                         saveStoreToFirebase();
                     }
                 };
+
+                window.addEventListener('mousemove', mouseMoveHandler);
+                window.addEventListener('mouseup', mouseUpHandler);
 
                 layer.appendChild(el);
             });
