@@ -173,20 +173,13 @@
         .free-sticker .sticker-controls {
             display: none;
             position: absolute;
-            top: -32px;
+            bottom: 100%;
             left: 0;
-            background: #121622;
-            border: 1px solid var(--pop-pink);
-            border-radius: 6px;
-            padding: 3px 8px;
-            gap: 6px;
-            font-size: 11px;
+            padding-bottom: 8px;
             z-index: 60;
-            white-space: nowrap;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.8);
         }
         .deco-mode-active .free-sticker:hover .sticker-controls {
-            display: flex;
+            display: block;
         }
 
         .eurovision-popup {
@@ -801,10 +794,12 @@
 
                 el.innerHTML = `
                     <div class="sticker-controls">
-                        <button type="button" onclick="resizeSticker('${stk.id}', -20)" class="px-2 py-0.5 bg-black/90 rounded text-white font-bold hover:bg-pink-600">-</button>
-                        <span class="text-xs font-bold text-gray-200">Größe</span>
-                        <button type="button" onclick="resizeSticker('${stk.id}', 20)" class="px-2 py-0.5 bg-black/90 rounded text-white font-bold hover:bg-pink-600">+</button>
-                        <button type="button" onclick="deleteSticker('${stk.id}')" class="px-2 py-0.5 bg-red-900 text-white rounded font-bold hover:bg-red-700 ml-1">Löschen</button>
+                        <div class="bg-[#121622] border border-[#ff2d95] rounded-lg p-1.5 flex items-center gap-2 shadow-2xl">
+                            <button type="button" onclick="resizeSticker('${stk.id}', -20)" class="px-2 py-0.5 bg-black/90 rounded text-white font-bold hover:bg-pink-600">-</button>
+                            <span class="text-xs font-bold text-gray-200">Größe</span>
+                            <button type="button" onclick="resizeSticker('${stk.id}', 20)" class="px-2 py-0.5 bg-black/90 rounded text-white font-bold hover:bg-pink-600">+</button>
+                            <button type="button" onclick="deleteSticker('${stk.id}')" class="px-2 py-0.5 bg-red-900 text-white rounded font-bold hover:bg-red-700 ml-1">Löschen</button>
+                        </div>
                     </div>
                     <img src="${stk.src}" class="w-full h-auto object-contain pointer-events-none drop-shadow-2xl" alt="Sticker">
                 `;
@@ -1161,6 +1156,9 @@
 
                 container.appendChild(monthBlock);
             });
+            
+            // Sofortiges Rendern der Sticker bei jedem Fahrplan-Aufbau
+            renderStickers();
         }
 
         function createVerticalSidebar(textVal, mIdx, wIdx, side) {
