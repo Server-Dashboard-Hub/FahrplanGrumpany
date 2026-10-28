@@ -251,26 +251,49 @@
 </head>
 <body id="mainBody" class="p-2 sm:p-4 flex flex-col justify-between min-h-screen w-full relative">
 
-    <!-- HEADER BAR -->
-    <header class="w-full mb-4 z-50 relative">
+    <!-- HAUPTDSMENÜ / JAHRES-AUSWAHL -->
+    <div id="mainMenuScreen" class="fixed inset-0 bg-[#07080b] z-50 flex flex-col items-center justify-center p-4">
+        <div class="eurovision-popup w-full max-w-xl p-8 text-center space-y-6 border border-[#232834]">
+            <div class="bg-gradient-to-br from-pink-600 to-purple-800 p-4 rounded-2xl text-white shadow-lg inline-block border border-pink-500/30 mb-2">
+                <i class="fas fa-truck-moving text-4xl text-white"></i>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-black tracking-wider uppercase text-white font-['Outfit']">
+                FAHRPLAN <span class="text-[#ff2d95]">GRUMPANY</span>
+            </h1>
+            <p class="text-xs text-gray-400">Wähle ein Jahr aus, um den Fahrplan und alle GIFs zu öffnen:</p>
+            
+            <div id="yearsMenuGrid" class="flex flex-wrap justify-center gap-4 py-4">
+                <!-- Dynamisch generierte Jahres-Buttons -->
+            </div>
+
+            <div class="pt-4 border-t border-[#222838] flex justify-center gap-4">
+                <button onclick="openModal('modalAddYear')" class="btn-pop-ghost text-xs px-4 py-2 flex items-center gap-2">
+                    <i class="fas fa-plus-circle text-[#ffd166]"></i> Neues Jahr hinzufügen
+                </button>
+                <button onclick="openModal('modalDbSettings')" class="btn-pop-ghost text-xs px-4 py-2 flex items-center gap-2">
+                    <i class="fas fa-cog text-[#ffd166]"></i> Datenbank URL
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER BAR (WENN IM FAHRPLAN) -->
+    <header id="fahrplanHeader" class="w-full mb-4 z-50 relative hidden">
         <div class="bg-[#101218] p-3 sm:p-4 rounded-2xl border border-[#232834] flex flex-wrap items-center justify-between gap-3 shadow-2xl">
             
             <div class="flex items-center space-x-3">
-                <div class="bg-gradient-to-br from-pink-600 to-purple-800 p-2.5 rounded-xl text-white shadow-lg border border-pink-500/30">
-                    <i class="fas fa-truck-moving text-2xl text-white"></i>
-                </div>
+                <button onclick="backToMainMenu()" class="btn-pop-ghost text-xs px-3 py-2 flex items-center gap-1.5 font-bold" title="Zurück zum Hauptmenü">
+                    <i class="fas fa-arrow-left text-[#ffd166]"></i> Menü
+                </button>
                 <div>
-                    <h1 class="text-xl sm:text-2xl font-black tracking-wider uppercase text-white font-['Outfit']">
-                        FAHRPLAN <span class="text-[#ff2d95]">GRUMPANY</span>
+                    <h1 class="text-lg sm:text-xl font-black tracking-wider uppercase text-white font-['Outfit']">
+                        FAHRPLAN <span id="lblActiveYearTitle" class="text-[#ff2d95]">2026</span>
                     </h1>
                     <div class="flex items-center gap-2 mt-0.5">
                         <span id="syncStatusBadge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-900/60 text-red-300 border border-red-500 flex items-center gap-1">
                             <span id="syncDot" class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
                             <span id="syncText">Getrennt</span>
                         </span>
-                        <button onclick="openModal('modalDbSettings')" class="text-[11px] text-[#ffd166] hover:underline font-bold flex items-center gap-1">
-                            <i class="fas fa-cog"></i> Datenbank
-                        </button>
                     </div>
                 </div>
             </div>
@@ -291,21 +314,9 @@
             </div>
 
             <div class="flex items-center gap-2 bg-[#08090c] p-1.5 rounded-xl border border-[#232834]">
-                <div class="flex items-center gap-1.5 px-2">
-                    <i class="fas fa-calendar-check text-[#ffd166] text-xs"></i>
-                    <span class="text-xs font-bold text-gray-400 uppercase font-['Outfit'] hidden sm:inline">Jahr:</span>
-                    <select id="yearSelect" onchange="switchYear(this.value)" class="bg-[#181c24] text-[#ffd166] font-bold font-mono text-sm border border-[#2d3545] rounded-lg px-2.5 py-1 focus:outline-none cursor-pointer">
-                    </select>
-                </div>
-                
                 <button onclick="scrollToToday()" class="btn-pop-pink text-xs px-3 py-1.5 flex items-center gap-1.5 shadow" title="Springe zum heutigen Tag">
                     <i class="fas fa-crosshairs text-[#ffd166]"></i>
                     <span>Heute</span>
-                </button>
-
-                <button onclick="openModal('modalAddYear')" class="btn-pop-ghost text-xs px-3 py-1.5 flex items-center gap-1 font-bold">
-                    <i class="fas fa-plus-circle text-[#ffd166]"></i>
-                    <span>Jahr +</span>
                 </button>
             </div>
 
@@ -330,14 +341,14 @@
     </header>
 
     <!-- FREIE STICKER EBENE -->
-    <div id="stickersLayer"></div>
+    <div id="stickersLayer" class="hidden"></div>
 
     <!-- MAIN CONTAINER -->
-    <main id="fahrplanContainer" class="w-full space-y-12 flex-grow overflow-x-auto pb-4 relative z-10">
+    <main id="fahrplanContainer" class="w-full space-y-12 flex-grow overflow-x-auto pb-4 relative z-10 hidden">
     </main>
 
     <!-- FOOTER -->
-    <footer class="w-full mt-12 text-center text-xs text-gray-500 py-3 border-t border-[#1a1e28] flex justify-between items-center px-2 relative z-10">
+    <footer id="fahrplanFooter" class="w-full mt-12 text-center text-xs text-gray-500 py-3 border-t border-[#1a1e28] flex justify-between items-center px-2 relative z-10 hidden">
         <p>Fahrplan Grumpany • Tabi (Neucha) & Poki (Kulim Park)</p>
         <p class="font-mono text-[10px] text-gray-600">Firebase Cloud Synchronisiert</p>
     </footer>
@@ -692,15 +703,13 @@
                 if (Object.keys(store).length === 0 || !store[curYear]) {
                     store[curYear] = generateCalendarYear(curYear);
                 }
-                if (!activeYear) {
-                    activeYear = Object.keys(store).length > 0 ? parseInt(Object.keys(store)[0], 10) : curYear;
-                }
-                if (!store[activeYear]) store[activeYear] = generateCalendarYear(activeYear);
 
-                setupYearDropdown();
+                renderMainMenuYears();
                 renderCompaniesManagerUI();
-                renderFahrplan();
-                renderStickers();
+                if (activeYear) {
+                    renderFahrplan();
+                    renderStickers();
+                }
             }, (error) => {
                 updateSyncStatus(false);
                 showToast("Datenbank-Fehler beim Laden!", "error");
@@ -720,6 +729,42 @@
                 updateSyncStatus(false);
                 showToast("Fehler beim Speichern in der Cloud!", "error");
             });
+        }
+
+        function renderMainMenuYears() {
+            const grid = document.getElementById("yearsMenuGrid");
+            if (!grid) return;
+            grid.innerHTML = "";
+            const years = Object.keys(store).map(Number).sort((a,b) => a - b);
+            years.forEach(y => {
+                const btn = document.createElement("button");
+                btn.className = "btn-pop-pink text-lg px-8 py-4 flex items-center gap-3 font-bold shadow-xl";
+                btn.innerHTML = `<i class="fas fa-calendar-alt text-[#ffd166]"></i> Jahr ${y}`;
+                btn.onclick = () => selectYearAndOpen(y);
+                grid.appendChild(btn);
+            });
+        }
+
+        function selectYearAndOpen(y) {
+            activeYear = y;
+            document.getElementById("lblActiveYearTitle").textContent = y;
+            document.getElementById("mainMenuScreen").classList.add("hidden");
+            document.getElementById("fahrplanHeader").classList.remove("hidden");
+            document.getElementById("stickersLayer").classList.remove("hidden");
+            document.getElementById("fahrplanContainer").classList.remove("hidden");
+            document.getElementById("fahrplanFooter").classList.remove("hidden");
+            renderFahrplan();
+            renderStickers();
+        }
+
+        function backToMainMenu() {
+            activeYear = null;
+            document.getElementById("mainMenuScreen").classList.remove("hidden");
+            document.getElementById("fahrplanHeader").classList.add("hidden");
+            document.getElementById("stickersLayer").classList.add("hidden");
+            document.getElementById("fahrplanContainer").classList.add("hidden");
+            document.getElementById("fahrplanFooter").classList.add("hidden");
+            renderMainMenuYears();
         }
 
         function toggleDecoMode() {
@@ -782,7 +827,7 @@
 
         function renderStickers() {
             const layer = document.getElementById("stickersLayer");
-            if (!layer) return;
+            if (!layer || !activeYear) return;
             layer.innerHTML = "";
 
             stickersList.forEach(stk => {
@@ -849,39 +894,13 @@
             showToast("Sticker gelöscht", "info");
         }
 
-        function setupYearDropdown() {
-            const sel = document.getElementById("yearSelect");
-            if (!sel) return;
-            sel.innerHTML = "";
-            const years = Object.keys(store).map(Number).sort((a,b) => a - b);
-            years.forEach(y => {
-                const opt = document.createElement("option");
-                opt.value = y;
-                opt.innerText = y;
-                if (y === activeYear) opt.selected = true;
-                sel.appendChild(opt);
-            });
-        }
-
-        function switchYear(yVal) {
-            if (!yVal) return;
-            activeYear = parseInt(yVal, 10);
-            if (!store[activeYear]) {
-                store[activeYear] = generateCalendarYear(activeYear);
-                saveStoreToFirebase();
-            }
-            renderFahrplan();
-        }
-
         function createNewYearConfirm() {
             const yInput = parseInt(document.getElementById("inputNewYear").value, 10);
             if (!yInput || yInput < 2000 || yInput > 2050) { showToast("Ungültiges Jahr!", "error"); return; }
             if (!store[yInput]) store[yInput] = generateCalendarYear(yInput);
-            activeYear = yInput;
             saveStoreToFirebase();
-            setupYearDropdown();
+            renderMainMenuYears();
             closeModal("modalAddYear");
-            renderFahrplan();
             showToast(`Jahr ${yInput} generiert!`, "success");
         }
 
@@ -931,6 +950,7 @@
         }
 
         function renderFahrplan() {
+            if (!activeYear) return;
             const container = document.getElementById("fahrplanContainer");
             if (!container) return;
             container.innerHTML = "";
@@ -1156,8 +1176,6 @@
 
                 container.appendChild(monthBlock);
             });
-            
-            // Sofortiges Rendern der Sticker bei jedem Fahrplan-Aufbau
             renderStickers();
         }
 
@@ -1327,7 +1345,7 @@
             const now = new Date();
             const curYear = now.getFullYear();
             const todayISO = now.toISOString().slice(0, 10);
-            if (store[curYear] && activeYear !== curYear) { activeYear = curYear; setupYearDropdown(); renderFahrplan(); }
+            if (activeYear !== curYear && store[curYear]) selectYearAndOpen(curYear);
             const todayCard = document.getElementById(`day-card-${todayISO}`);
             if (todayCard) {
                 todayCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1521,11 +1539,8 @@
                         companyLogos = data.companyLogos || {};
                         stickersList = data.stickersList || [];
                         saveStoreToFirebase();
-                        setupYearDropdown();
-                        if (Object.keys(store).length > 0) activeYear = parseInt(Object.keys(store)[0], 10);
-                        renderCompaniesManagerUI();
-                        renderFahrplan();
-                        renderStickers();
+                        renderMainMenuYears();
+                        if (activeYear) { renderFahrplan(); renderStickers(); }
                         showToast("Backup erfolgreich geladen!", "success");
                     }
                 } catch(err) { showToast("Fehler beim Import!", "error"); }
