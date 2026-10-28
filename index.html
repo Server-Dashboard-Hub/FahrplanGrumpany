@@ -547,7 +547,8 @@
             databaseURL: "https://fahrplangrumpany-default-rtdb.europe-west1.firebasedatabase.app/"
         };
         const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.database(app);
+        // Exakte Übergabe der europäischen Region-URL
+        const db = firebase.database(app, "https://fahrplangrumpany-default-rtdb.europe-west1.firebasedatabase.app/");
 
         const WEEKDAYS = ["MONTAG", "DIENSTAG", "MITTWOCH", "DONNERSTAG", "FREITAG", "SAMSTAG", "SONNTAG"];
         const MONTH_NAMES = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
