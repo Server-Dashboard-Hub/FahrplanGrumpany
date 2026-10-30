@@ -83,7 +83,7 @@
             gap: 6px;
         }
 
-        /* HIER: TAGESKACHELN ABSOLUT ECKIG GEMACHT */
+        /* NUR TAGESKACHELN SIND KOMPLETT ECKIG */
         .day-block-top {
             min-height: 135px;
             box-sizing: border-box;
@@ -154,7 +154,7 @@
         #stickersLayer {
             position: absolute;
             inset: 0;
-            pointer-events: none;
+            pointer-events: none; /* Klicks gehen durch auf die Kacheln, es sei denn man klickt exakt auf ein Bild */
             overflow: visible;
             z-index: 40;
         }
@@ -163,7 +163,7 @@
             user-select: none;
             cursor: default;
             z-index: 45;
-            pointer-events: auto;
+            pointer-events: auto; /* Bild fängt Klicks auf */
         }
         .deco-mode-active .free-sticker {
             cursor: grab;
@@ -595,8 +595,6 @@
     <!-- TOASTS -->
     <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-
-    <!-- JAVASCRIPT MIT FIREBASE REALTIME DB -->
     <script>
         const DEFAULT_DB_URL = "https://fahrplangrumpany-default-rtdb.europe-west1.firebasedatabase.app/";
         let currentDbUrl = localStorage.getItem("grumpany_db_url") || DEFAULT_DB_URL;
@@ -757,8 +755,7 @@
             document.getElementById("fahrplanContainer").classList.remove("hidden");
             document.getElementById("fahrplanFooter").classList.remove("hidden");
             renderFahrplan();
-            renderStickers();
-            autoTriggerDecoButtonTwice();
+            renderStickers(); // Lädt Bilder SOFORT
         }
 
         function backToMainMenu() {
@@ -771,16 +768,8 @@
             renderMainMenuYears();
         }
 
-        // AUTOMATISCHER PROZESS: Drückt den Knopf softwareseitig 2 mal im Hintergrund
-        function autoTriggerDecoButtonTwice() {
-            setTimeout(() => {
-                toggleDecoMode(); // 1. Mal an
-                setTimeout(() => {
-                    toggleDecoMode(); // 2. Mal aus
-                }, 60);
-            }, 80);
-        }
-
+        // HIER DER FIX: "Dekorieren" toggelt nur noch die CSS-Klasse, 
+        // ohne die Bilder kaputt zu machen und neu zu laden!
         function toggleDecoMode() {
             isDecoMode = !isDecoMode;
             const body = document.getElementById("mainBody");
@@ -796,7 +785,6 @@
                 if (btn) btn.className = "btn-pop-ghost text-xs px-3 py-1.5 flex items-center gap-1.5 font-bold";
                 if (lbl) lbl.textContent = "🎨 Dekorieren: AUS";
             }
-            renderStickers();
         }
 
         function confirmAddSticker() {
@@ -835,63 +823,81 @@
             closeModal('modalAddSticker');
             document.getElementById("stickerFileinput").value = "";
             document.getElementById("stickerUrlInput").value = "";
-            showToast("Sticker für alle hinzugefügt!", "success");
+            showToast("Sticker hinzugefügt!", "success");
         }
 
+        // HIER DER ZWEITE FIX: Smart Rendering. 
+        // Läd die Bilder nicht mehr komplett neu (was Flackern auslöst), sondern aktualisiert nur Positionen!
         function renderStickers() {
             const layer = document.getElementById("stickersLayer");
             if (!layer || !activeYear) return;
-            layer.innerHTML = "";
 
+            // Gelöschte Sticker entfernen
+            const currentIds = stickersList.map(s => s.id);
+            Array.from(layer.children).forEach(el => {
+                const id = el.id.replace('sticker-el-', '');
+                if (!currentIds.includes(id)) {
+                    el.remove();
+                }
+            });
+
+            // Vorhandene updaten oder Neue hinzufügen (ohne HTML neu aufzubauen)
             stickersList.forEach(stk => {
-                const el = document.createElement("div");
-                el.className = "free-sticker";
+                let el = document.getElementById(`sticker-el-${stk.id}`);
+                
+                if (!el) {
+                    // Wird nur einmalig pro Bild ausgeführt
+                    el = document.createElement("div");
+                    el.id = `sticker-el-${stk.id}`;
+                    el.className = "free-sticker";
+                    el.innerHTML = `
+                        <div class="sticker-controls">
+                            <div class="bg-[#121622] border border-[#ff2d95] rounded-lg p-1.5 flex items-center gap-2 shadow-2xl">
+                                <button type="button" onclick="resizeSticker('${stk.id}', -20)" class="px-2 py-0.5 bg-black/90 rounded text-white font-bold hover:bg-pink-600">-</button>
+                                <span class="text-xs font-bold text-gray-200">Größe</span>
+                                <button type="button" onclick="resizeSticker('${stk.id}', 20)" class="px-2 py-0.5 bg-black/90 rounded text-white font-bold hover:bg-pink-600">+</button>
+                                <button type="button" onclick="deleteSticker('${stk.id}')" class="px-2 py-0.5 bg-red-900 text-white rounded font-bold hover:bg-red-700 ml-1">Löschen</button>
+                            </div>
+                        </div>
+                        <img src="${stk.src}" class="w-full h-auto object-contain pointer-events-none drop-shadow-2xl" alt="Sticker">
+                    `;
+                    
+                    let isDragging = false;
+                    let startX, startY;
+
+                    el.onmousedown = (e) => {
+                        if (!isDecoMode || e.target.tagName === 'BUTTON') return;
+                        isDragging = true;
+                        startX = e.clientX - stk.x;
+                        startY = e.clientY - stk.y;
+                        e.stopPropagation();
+                    };
+
+                    const mouseMoveHandler = (e) => {
+                        if (!isDragging) return;
+                        stk.x = e.clientX - startX;
+                        stk.y = e.clientY - startY;
+                        el.style.left = stk.x + "px";
+                        el.style.top = stk.y + "px";
+                    };
+
+                    const mouseUpHandler = () => {
+                        if (isDragging) {
+                            isDragging = false;
+                            saveStoreToFirebase(); 
+                        }
+                    };
+
+                    window.addEventListener('mousemove', mouseMoveHandler);
+                    window.addEventListener('mouseup', mouseUpHandler);
+
+                    layer.appendChild(el);
+                }
+
+                // Update Position und Größe (verhindert das Bild-Neuladen)
                 el.style.left = stk.x + "px";
                 el.style.top = stk.y + "px";
                 el.style.width = stk.width + "px";
-
-                el.innerHTML = `
-                    <div class="sticker-controls">
-                        <div class="bg-[#121622] border border-[#ff2d95] rounded-lg p-1.5 flex items-center gap-2 shadow-2xl">
-                            <button type="button" onclick="resizeSticker('${stk.id}', -20)" class="px-2 py-0.5 bg-black/90 rounded text-white font-bold hover:bg-pink-600">-</button>
-                            <span class="text-xs font-bold text-gray-200">Größe</span>
-                            <button type="button" onclick="resizeSticker('${stk.id}', 20)" class="px-2 py-0.5 bg-black/90 rounded text-white font-bold hover:bg-pink-600">+</button>
-                            <button type="button" onclick="deleteSticker('${stk.id}')" class="px-2 py-0.5 bg-red-900 text-white rounded font-bold hover:bg-red-700 ml-1">Löschen</button>
-                        </div>
-                    </div>
-                    <img src="${stk.src}" class="w-full h-auto object-contain pointer-events-none drop-shadow-2xl" alt="Sticker">
-                `;
-
-                let isDragging = false;
-                let startX, startY;
-
-                el.onmousedown = (e) => {
-                    if (!isDecoMode || e.target.tagName === 'BUTTON') return;
-                    isDragging = true;
-                    startX = e.clientX - stk.x;
-                    startY = e.clientY - stk.y;
-                    e.stopPropagation();
-                };
-
-                const mouseMoveHandler = (e) => {
-                    if (!isDragging) return;
-                    stk.x = e.clientX - startX;
-                    stk.y = e.clientY - startY;
-                    el.style.left = stk.x + "px";
-                    el.style.top = stk.y + "px";
-                };
-
-                const mouseUpHandler = () => {
-                    if (isDragging) {
-                        isDragging = false;
-                        saveStoreToFirebase();
-                    }
-                };
-
-                window.addEventListener('mousemove', mouseMoveHandler);
-                window.addEventListener('mouseup', mouseUpHandler);
-
-                layer.appendChild(el);
             });
         }
 
@@ -1192,8 +1198,9 @@
 
                 container.appendChild(monthBlock);
             });
+            
+            // Einmaliger Aufruf wenn das Jahr gerendert wird.
             renderStickers();
-            autoTriggerDecoButtonTwice();
         }
 
         function createVerticalSidebar(textVal, mIdx, wIdx, side) {
